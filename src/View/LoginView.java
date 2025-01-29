@@ -14,10 +14,10 @@ public class LoginView extends JFrame {
 
     public LoginView() {
         setTitle("Library Management System - Login");
-        setSize(500, 450);
+        setSize(600, 500);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
-        setResizable(false);
+        setResizable(true);
 
         JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
         mainPanel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));

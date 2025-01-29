@@ -17,6 +17,7 @@ public class AdminDashboardView extends JFrame {
     private JButton btnRemoveBook;
     private JButton btnViewHistory;
     private JButton btnSearchBook;
+    private JButton btnLogout;
     private JTextField txtSearchBook;
 
     public AdminDashboardView() {
@@ -24,14 +25,14 @@ public class AdminDashboardView extends JFrame {
         setSize(600, 500);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
-        setResizable(false);
+        setResizable(true);
 
 
         JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
         mainPanel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
 
         JLabel headingLabel = new JLabel("LIBRARY MANAGEMENT SYSTEM - ADMIN", SwingConstants.CENTER);
-        headingLabel.setFont(new Font("Arial", Font.BOLD, 14));
+        headingLabel.setFont(new Font("Arial", Font.BOLD, 16));
         headingLabel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 0));
         mainPanel.add(headingLabel, BorderLayout.NORTH);
 
@@ -44,20 +45,29 @@ public class AdminDashboardView extends JFrame {
         btnRemoveBook = createButton("Remove Book", "Remove an existing book");
         btnViewHistory = createButton("View Borrowing History", "View history of borrowed books");
         btnSearchBook = createButton("Search Book", "Search for a book by title or author");
+        btnLogout = createButton("Logout", "Logout and return to login page");
+
 
         buttonPanel.add(createButtonPanel(btnAddBook));
         buttonPanel.add(createButtonPanel(btnRemoveBook));
         buttonPanel.add(createButtonPanel(btnSearchBook));
         buttonPanel.add(createButtonPanel(btnViewHistory));
+        buttonPanel.add(createButtonPanel(btnLogout));
+
+        JPanel containerPanel = new JPanel(new BorderLayout());
+        containerPanel.setPreferredSize(new Dimension(350, 300));
+        containerPanel.add(buttonPanel, BorderLayout.CENTER);
 
 
         txtSearchBook = new JTextField(20);
 
 
         mainPanel.add(buttonPanel, BorderLayout.CENTER);
+        setContentPane(mainPanel);
+
+        btnLogout.addActionListener(e -> logout());
 
 
-        add(mainPanel);
 
 
         btnAddBook.addActionListener(new ActionListener() {
@@ -90,6 +100,7 @@ public class AdminDashboardView extends JFrame {
     }
 
 
+
     private JButton createButton(String buttonText, String toolTip) {
         JButton button = new JButton(buttonText);
         button.setToolTipText(toolTip);
@@ -98,9 +109,13 @@ public class AdminDashboardView extends JFrame {
 
 
     private JPanel createButtonPanel(JButton button) {
+        button.setPreferredSize(new Dimension(250, 50));
+        button.setMaximumSize(new Dimension(300, 60));
+        button.setFont(new Font("Arial", Font.BOLD, 14));
+        button.setAlignmentX(Component.CENTER_ALIGNMENT);
         JPanel panel = new JPanel();
-        panel.setLayout(new BorderLayout());
-        panel.add(button, BorderLayout.CENTER);
+        panel.setLayout(new FlowLayout(FlowLayout.CENTER));
+        panel.add(button);
         return panel;
     }
 
@@ -110,6 +125,7 @@ public class AdminDashboardView extends JFrame {
         String author = JOptionPane.showInputDialog(this, "Enter Author Name:");
         int bookId = Integer.parseInt(JOptionPane.showInputDialog(this, "Enter Book ID:"));
         boolean isAvailable = JOptionPane.showConfirmDialog(this, "Is the book available?", "Availability", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION;
+
 
 
         DatabaseLogic.addBook(title, author, bookId, isAvailable);
@@ -132,7 +148,10 @@ public class AdminDashboardView extends JFrame {
         DatabaseLogic.searchBook(query);
     }
 
-
+    private void logout() {
+        dispose();
+        SwingUtilities.invokeLater(() -> new LoginView().setVisible(true));
+    }
 
     private void viewHistory() {
 

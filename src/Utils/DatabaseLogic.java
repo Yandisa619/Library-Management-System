@@ -16,14 +16,16 @@ public class DatabaseLogic {
 
 
     public static void addBook(String title, String author, int bookId, boolean isAvailable) {
-        String query = "INSERT INTO books (book_id, title, author, available) VALUES (?, ?, ?, ?)";
+
+        String avabilityStatus = isAvailable ? "yes" : "no";
+        String query = "INSERT INTO books (book_id, title, author, availability_status) VALUES (?, ?, ?, ?)";
 
         try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
             stmt.setInt(1, bookId);
             stmt.setString(2, title);
             stmt.setString(3, author);
-            stmt.setBoolean(4, isAvailable);
+            stmt.setString(4, avabilityStatus);
             int result = stmt.executeUpdate();
 
             if (result > 0) {
@@ -69,11 +71,19 @@ public class DatabaseLogic {
                 int bookId = rs.getInt("book_id");
                 String title = rs.getString("title");
                 String author = rs.getString("author");
-                boolean available = rs.getBoolean("available");
+                String available = rs.getString("available");
                 System.out.println("Book ID: " + bookId + ", Title: " + title + ", Author: " + author + ", Available: " + available);
+
+                if (available.equalsIgnoreCase("NO")){
+                    JOptionPane.showMessageDialog(null, "The book '" + title + "'is currently not available in the library.", "Book Unavailable", JOptionPane.WARNING_MESSAGE);
+                } else {
+                    JOptionPane.showMessageDialog(null, "No books found matching your search query.", "Search Result", JOptionPane.INFORMATION_MESSAGE);
+                }
+
             }
         } catch (SQLException e) {
             e.printStackTrace();
+            JOptionPane.showMessageDialog(null, "An error occurred while searching for books", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -114,7 +124,7 @@ public class DatabaseLogic {
 
 
     public static void borrowBook(int userId, int bookId) {
-        String query = "INSERT INTO borrowing_records (user_id, book_id, borrow_date) VALUES (?, ?, NOW())";
+        String query = "INSERT INTO borrowing_history (user_id, book_id, borrow_date) VALUES (?, ?, NOW())";
 
         try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
@@ -209,8 +219,6 @@ public class DatabaseLogic {
                 JOptionPane.showMessageDialog(null, "Error retrieving borrowing history.", "Error", JOptionPane.ERROR_MESSAGE);
             }
         }
-
-
 
     private static void updateBookAvailability(int bookId, boolean isAvailable) {
         String query = "UPDATE books SET available = ? WHERE book_id = ?";

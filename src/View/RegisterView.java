@@ -2,9 +2,7 @@ package View;
 import Utils.DatabaseConnection;
 import javax.swing.*;
 import java.awt.*;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
+import java.sql.*;
 import java.util.Random;
 
 public class RegisterView extends JFrame {
@@ -23,29 +21,30 @@ public class RegisterView extends JFrame {
 
         DatabaseConnection.initializeDatabase();
         setTitle("Library Management System - Registration");
-        setSize(500, 450);
+        setSize(600, 500);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
-        setResizable(false);
+        setResizable(true);
 
         JPanel mainPanel = new JPanel(new BorderLayout());
 
         JLabel headingLabel = new JLabel("LIBRARY MANAGEMENT SYSTEM", SwingConstants.CENTER);
-        headingLabel.setFont(new Font("Arial", Font.BOLD, 14));
+        headingLabel.setFont(new Font("Arial", Font.BOLD, 16));
         headingLabel.setBorder(BorderFactory.createEmptyBorder(10,10,10,0));
         mainPanel.add(headingLabel, BorderLayout.NORTH);
 
         JPanel panel = new JPanel(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(10, 10, 10, 10);
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-
+        gbc.insets = new Insets(10,10,10,10);
         gbc.gridx = 0;
         gbc.gridy = 0;
         panel.add(new JLabel("Username:"), gbc);
 
         txtUsername = new JTextField(20);
+        txtUsername.setPreferredSize(new Dimension(200, 30));
         gbc.gridx = 1;
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.weightx = 0;
         panel.add(txtUsername, gbc);
 
         gbc.gridx = 0;
@@ -53,7 +52,10 @@ public class RegisterView extends JFrame {
         panel.add(new JLabel("Name:"), gbc);
 
         txtName = new JTextField(20);
+        txtName.setPreferredSize(new Dimension(200, 30));
         gbc.gridx = 1;
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.weightx = 0;
         panel.add(txtName, gbc);
 
         gbc.gridx = 0;
@@ -61,7 +63,10 @@ public class RegisterView extends JFrame {
         panel.add(new JLabel("Email:"), gbc);
 
         txtEmail = new JTextField(20);
+        txtEmail.setPreferredSize(new Dimension(200, 30));
         gbc.gridx = 1;
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.weightx = 0;
         panel.add(txtEmail, gbc);
 
         gbc.gridx = 0;
@@ -69,7 +74,10 @@ public class RegisterView extends JFrame {
         panel.add(new JLabel("Password:"), gbc);
 
         txtPassword = new JPasswordField(20);
+        txtPassword.setPreferredSize(new Dimension(200, 30));
         gbc.gridx = 1;
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.weightx = 0;
         panel.add(txtPassword, gbc);
 
         gbc.gridx = 0;
@@ -77,7 +85,10 @@ public class RegisterView extends JFrame {
         panel.add(new JLabel("Confirm Password:"), gbc);
 
         txtConfirmPassword = new JPasswordField(20);
+        txtConfirmPassword.setPreferredSize(new Dimension(200,30));
         gbc.gridx = 1;
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.weightx = 0;
         panel.add(txtConfirmPassword, gbc);
 
         gbc.gridx = 0;
@@ -86,26 +97,38 @@ public class RegisterView extends JFrame {
 
         String[] roles = {"User", "Admin"};
         roleComboBox = new JComboBox<>(roles);
+        roleComboBox.setPreferredSize(new Dimension(200, 30));
         gbc.gridx = 1;
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.weightx = 0;
         panel.add(roleComboBox, gbc);
 
 
         btnGeneratePassword = new JButton("Generate Password");
+        btnGeneratePassword.setPreferredSize(new Dimension(200, 40));
         gbc.gridx = 0;
         gbc.gridy = 6;
         gbc.gridwidth = 2;
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.anchor = GridBagConstraints.CENTER;
         panel.add(btnGeneratePassword, gbc);
 
 
         btnSubmit = new JButton("Submit");
+        btnSubmit.setPreferredSize(new Dimension(150, 40));
         gbc.gridx = 0;
         gbc.gridy = 7;
         gbc.gridwidth = 1;
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.anchor = GridBagConstraints.CENTER;
         panel.add(btnSubmit, gbc);
 
 
         btnCancel = new JButton("Cancel");
+        btnCancel.setPreferredSize(new Dimension(150, 40));
         gbc.gridx = 1;
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.anchor = GridBagConstraints.CENTER;
         panel.add(btnCancel, gbc);
 
         mainPanel.add(panel, BorderLayout.CENTER);
@@ -137,14 +160,17 @@ public class RegisterView extends JFrame {
         return password.toString();
     }
 
+
+
+ 
+
     private void handleSubmit() {
-        String username = txtName.getText().trim();
         String name = txtName.getText().trim();
         String email = txtEmail.getText().trim();
         String password = new String(txtPassword.getPassword());
         String confirmPassword = new String(txtConfirmPassword.getPassword());
+        String username = txtUsername.getText().trim();  // Ensure this is from a username input field
         String role = (String) roleComboBox.getSelectedItem();
-
 
         if (name.isEmpty() || email.isEmpty() || password.isEmpty() || confirmPassword.isEmpty() || username.isEmpty()) {
             JOptionPane.showMessageDialog(this, "All fields are required!", "Validation Error", JOptionPane.ERROR_MESSAGE);
@@ -161,19 +187,55 @@ public class RegisterView extends JFrame {
             return;
         }
 
-        if (saveUserToDatabase(name, email, password, role, username)) {
-            JOptionPane.showMessageDialog(this, "Registration Successful!", "Success", JOptionPane.INFORMATION_MESSAGE);
+        int userId = saveUserToDatabase(name, email, password, role, username);
+        if (userId != -1) {
+            JOptionPane.showMessageDialog(this, "Registration Successful!\nYour User ID: " + userId, "Success", JOptionPane.INFORMATION_MESSAGE);
             redirectToLoginPage();
         } else {
             JOptionPane.showMessageDialog(this, "Registration Failed. Please try again.", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
-    private void handleCancel() {
-        int choice = JOptionPane.showConfirmDialog(this, "Are you sure you want to cancel?", "Confirm Cancel", JOptionPane.YES_NO_OPTION);
-        if (choice == JOptionPane.YES_OPTION) {
-            dispose();
+    private int fetchUserId(String email) {
+        String query = "SELECT user_id FROM users WHERE email = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(query)) {
+
+            pstmt.setString(1, email);
+            ResultSet rs = pstmt.executeQuery();
+
+            if (rs.next()) {
+                return rs.getInt("user_id");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
+        return -1; // Return -1 if user ID is not found
+    }
+
+    private int saveUserToDatabase(String name, String email, String password, String role, String username) {
+        String insertQuery = "INSERT INTO users (name, email, password, role, username) VALUES (?, ?, ?, ?, ?)";
+        String getIdQuery = "SELECT last_insert_rowid() AS user_id";  // Works for SQLite; Use `SELECT LAST_INSERT_ID()` for MySQL
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(insertQuery);
+             Statement stmt = conn.createStatement()) {
+
+            pstmt.setString(1, name);
+            pstmt.setString(2, email);
+            pstmt.setString(3, password);
+            pstmt.setString(4, role);
+            pstmt.setString(5, username);
+            pstmt.executeUpdate();
+
+            ResultSet rs = stmt.executeQuery(getIdQuery);
+            if (rs.next()) {
+                return rs.getInt("user_id"); // Return user_id instead of boolean
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return -1; // Return -1 if insertion fails
     }
 
     private boolean isEmailAlreadyRegistered(String email) {
@@ -183,29 +245,17 @@ public class RegisterView extends JFrame {
 
             pstmt.setString(1, email);
             ResultSet rs = pstmt.executeQuery();
-            return rs.next();
-        } catch (Exception e) {
+            return rs.next(); // If a result exists, the email is already registered
+        } catch (SQLException e) {
             e.printStackTrace();
-            return false;
         }
+        return false;
     }
 
-    private boolean saveUserToDatabase(String name, String email, String password, String role, String username) {
-        String insertQuery = "INSERT INTO users (name, email, password, role, username) VALUES (?, ?, ?, ?, ?)";
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(insertQuery)) {
-
-            pstmt.setString(1, name);
-            pstmt.setString(2, email);
-            pstmt.setString(3, password);
-            pstmt.setString(4, role);
-            pstmt.setString(5, username);
-
-            pstmt.executeUpdate();
-            return true;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
+    private void handleCancel() {
+        int choice = JOptionPane.showConfirmDialog(this, "Are you sure you want to cancel?", "Confirm Cancel", JOptionPane.YES_NO_OPTION);
+        if (choice == JOptionPane.YES_OPTION) {
+            dispose();  // Close the current form
         }
     }
 

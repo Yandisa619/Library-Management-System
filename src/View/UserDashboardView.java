@@ -11,14 +11,16 @@ public class UserDashboardView extends JFrame {
     private JButton btnReturnBook;
     private JButton btnViewHistory;
     private final JButton btnSearchBook;
+    private JButton btnLogout;
     private final JTextField txtSearchBook;
+
 
     public UserDashboardView() {
         setTitle("User Dashboard - Library Management System");
         setSize(600, 500);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
-        setResizable(false);
+        setResizable(true);
 
         JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
         mainPanel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
@@ -44,12 +46,19 @@ public class UserDashboardView extends JFrame {
         btnBorrowBook = new JButton("Borrow Book");
         btnReturnBook = new JButton("Return Book");
         btnViewHistory = new JButton("View Borrowing History");
+        btnLogout = new JButton("Logout");
 
         buttonPanel.add(createButtonPanel(btnBorrowBook, "Borrow a book from the library"));
         buttonPanel.add(createButtonPanel(btnReturnBook, "Return a borrowed book"));
         buttonPanel.add(createButtonPanel(btnViewHistory, "View your borrowing history"));
-
+        buttonPanel.add(createButtonPanel(btnLogout, "Logout and return to Login Page"));
         mainPanel.add(buttonPanel, BorderLayout.CENTER);
+
+        JPanel containerPanel = new JPanel(new BorderLayout());
+        containerPanel.setPreferredSize(new Dimension(350, 300));
+        containerPanel.add(buttonPanel, BorderLayout.CENTER);
+
+        mainPanel.add(containerPanel, BorderLayout.CENTER);
 
         add(mainPanel);
         addListeners();
@@ -67,13 +76,20 @@ public class UserDashboardView extends JFrame {
 
 
         btnViewHistory.addActionListener(e -> viewHistory());
+
+        btnLogout.addActionListener(e -> logout());
     }
 
     private JPanel createButtonPanel(JButton button, String toolTip) {
+        button.setPreferredSize(new Dimension(250, 50));
+        button.setMaximumSize(new Dimension(300, 60));
+        button.setFont(new Font("Arial", Font.BOLD, 14));
+        button.setAlignmentX(Component.CENTER_ALIGNMENT);
+
         JPanel panel = new JPanel();
-        panel.setLayout(new BorderLayout());
+        panel.setLayout(new FlowLayout(FlowLayout.CENTER));
         button.setToolTipText(toolTip);
-        panel.add(button, BorderLayout.CENTER);
+        panel.add(button);
         return panel;
     }
 
@@ -87,6 +103,11 @@ public class UserDashboardView extends JFrame {
 
     public JButton getViewHistoryButton() {
         return btnViewHistory;
+    }
+
+    private void logout() {
+        dispose();
+        SwingUtilities.invokeLater(() -> new LoginView().setVisible(true));
     }
 
     private void searchBook() {

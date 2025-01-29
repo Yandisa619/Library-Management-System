@@ -4,6 +4,7 @@ import javax.swing.*;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import javax.swing.table.DefaultTableModel;
 
 public class DatabaseLogic {
 
@@ -15,17 +16,17 @@ public class DatabaseLogic {
     }
 
 
-    public static void addBook(String title, String author, int bookId, boolean isAvailable) {
+    public static void addBook(String title, String author, int bookId, int isAvailable) {
 
-        String avabilityStatus = isAvailable ? "yes" : "no";
-        String query = "INSERT INTO books (book_id, title, author, availability_status) VALUES (?, ?, ?, ?)";
+        int availability = isAvailable;
+        String query = "INSERT INTO books (book_id, title, author, available) VALUES (?, ?, ?, ?)";
 
         try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
             stmt.setInt(1, bookId);
             stmt.setString(2, title);
             stmt.setString(3, author);
-            stmt.setString(4, avabilityStatus);
+            stmt.setInt(4, availability);
             int result = stmt.executeUpdate();
 
             if (result > 0) {
@@ -124,7 +125,7 @@ public class DatabaseLogic {
 
 
     public static void borrowBook(int userId, int bookId) {
-        String query = "INSERT INTO borrowing_history (user_id, book_id, borrow_date) VALUES (?, ?, NOW())";
+        String query = "INSERT INTO borrowing_history (user_id, book_id, borrow_date, return_date) VALUES (?, ?, CURRENT_TIMESTAMP, NULL)";
 
         try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
@@ -144,40 +145,84 @@ public class DatabaseLogic {
         }
     }
 
+    public static void showAvailableBooks() {
+        String query = "SELECT book_id, title, author, available FROM books";
+
+        try (Connection conn = getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query);
+             ResultSet rs = stmt.executeQuery()) {
+
+
+            String[] columnNames = {"Book ID", "Title", "Author", "Availability"};
+
+
+            DefaultTableModel model = new DefaultTableModel(columnNames, 0);
+
+
+            while (rs.next()) {
+                int bookId = rs.getInt("book_id");
+                String title = rs.getString("title");
+                String author = rs.getString("author");
+                boolean available = rs.getBoolean("available");
+
+
+                String status = available ? "Available" : "Not Available";
+
+
+                model.addRow(new Object[]{bookId, title, author, status});
+            }
+
+
+            JTable table = new JTable(model);
+
+
+            JScrollPane scrollPane = new JScrollPane(table);
+
+
+            JOptionPane.showMessageDialog(null, scrollPane, "Available Books", JOptionPane.INFORMATION_MESSAGE);
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(null, "Error retrieving available books.", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
 
     public static void returnBook(int userId, int bookId) {
-        String returnBookQuery = "UPDATE borrowing_records SET return_date = NOW() WHERE user_id = ? AND book_id = ? AND return_date IS NULL";
+        String checkQuery = "SELECT return_date FROM borrowing_history WHERE user_id = ? AND book_id = ? AND return_date IS NULL";
+        String returnBookQuery = "UPDATE borrowing_history SET return_date = CURRENT_TIMESTAMP WHERE user_id = ? AND book_id = ? AND return_date IS NULL";
         String updateBookQuery = "UPDATE books SET available = ? WHERE book_id = ?";
-
 
         try (Connection conn = getConnection()) {
             conn.setAutoCommit(false);
 
-            try (PreparedStatement returnStmt = conn.prepareStatement(returnBookQuery);
-                 PreparedStatement updateStmt = conn.prepareStatement(updateBookQuery)) {
+            try (PreparedStatement checkStmt = conn.prepareStatement(checkQuery)) {
+                checkStmt.setInt(1, userId);
+                checkStmt.setInt(2, bookId);
+                ResultSet rs = checkStmt.executeQuery();
 
+                if (rs.next()) {
+                    try (PreparedStatement returnStmt = conn.prepareStatement(returnBookQuery);
+                         PreparedStatement updateStmt = conn.prepareStatement(updateBookQuery)) {
 
-                returnStmt.setInt(1, userId);
-                returnStmt.setInt(2, bookId);
-                int result = returnStmt.executeUpdate();
+                        returnStmt.setInt(1, userId);
+                        returnStmt.setInt(2, bookId);
+                        int result = returnStmt.executeUpdate();
 
-                if (result > 0) {
-                    System.out.println("Book returned successfully.");
-
-
-                    updateStmt.setBoolean(1, true);
-                    updateStmt.setInt(2, bookId);
-                    updateStmt.executeUpdate();
-
-                    conn.commit();
+                        if (result > 0) {
+                            System.out.println("Book returned successfully.");
+                            updateStmt.setBoolean(1, true);
+                            updateStmt.setInt(2, bookId);
+                            updateStmt.executeUpdate();
+                            conn.commit();
+                        } else {
+                            System.out.println("Failed to return book.");
+                            conn.rollback();
+                        }
+                    }
                 } else {
-                    System.out.println("Failed to return book. No matching borrowing record found.");
-                    conn.rollback();
+                    System.out.println("Error: Book was either not borrowed or already returned.");
                 }
-
-            } catch (SQLException e) {
-                e.printStackTrace();
-                conn.rollback();
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -186,39 +231,49 @@ public class DatabaseLogic {
 
 
 
-        public static void viewBorrowingHistory() {
-            String query = "SELECT u.name, b.title, br.borrow_date, br.return_date " +
-                    "FROM borrowing_history br " +
-                    "JOIN users u ON br.user_id = u.user_id " +
-                    "JOIN books b ON br.book_id = b.book_id";
 
-            try (Connection conn = getConnection();
-                 PreparedStatement stmt = conn.prepareStatement(query)) {
+    public static void viewBorrowingHistory() {
+        String query = "SELECT u.name, b.title, br.borrow_date, br.return_date " +
+                "FROM borrowing_history br " +
+                "JOIN users u ON br.user_id = u.user_id " +
+                "JOIN books b ON br.book_id = b.book_id";
 
-                ResultSet rs = stmt.executeQuery();
-                StringBuilder history = new StringBuilder();
+        try (Connection conn = getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
 
-                while (rs.next()) {
-                    String userName = rs.getString("name");
-                    String bookTitle = rs.getString("title");
-                    String borrowDate = rs.getDate("borrow_date").toString();
-                    String returnDate = rs.getDate("return_date") != null ? rs.getDate("return_date").toString() : "Not Returned";
-
-                    history.append("User: ").append(userName)
-                            .append(", Book: ").append(bookTitle)
-                            .append(", Borrowed on: ").append(borrowDate)
-                            .append(", Returned on: ").append(returnDate)
-                            .append("\n");
-                }
+            ResultSet rs = stmt.executeQuery();
 
 
-                JOptionPane.showMessageDialog(null, history.toString(), "Borrowing History", JOptionPane.INFORMATION_MESSAGE);
+            String[] columnNames = {"User Name", "Book Title", "Borrowed On", "Returned On"};
 
-            } catch (SQLException e) {
-                e.printStackTrace();
-                JOptionPane.showMessageDialog(null, "Error retrieving borrowing history.", "Error", JOptionPane.ERROR_MESSAGE);
+
+            DefaultTableModel model = new DefaultTableModel(columnNames, 0);
+
+
+            while (rs.next()) {
+                String userName = rs.getString("name");
+                String bookTitle = rs.getString("title");
+                String borrowDate = rs.getDate("borrow_date").toString();
+                String returnDate = rs.getDate("return_date") != null ? rs.getDate("return_date").toString() : "Not Returned";
+
+
+                model.addRow(new Object[]{userName, bookTitle, borrowDate, returnDate});
             }
+
+
+            JTable table = new JTable(model);
+
+
+            JScrollPane scrollPane = new JScrollPane(table);
+
+
+            JOptionPane.showMessageDialog(null, scrollPane, "Borrowing History", JOptionPane.INFORMATION_MESSAGE);
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(null, "Error retrieving borrowing history.", "Error", JOptionPane.ERROR_MESSAGE);
         }
+    }
 
     private static void updateBookAvailability(int bookId, boolean isAvailable) {
         String query = "UPDATE books SET available = ? WHERE book_id = ?";

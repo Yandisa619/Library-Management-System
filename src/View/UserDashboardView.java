@@ -8,6 +8,7 @@ import java.awt.*;
 public class UserDashboardView extends JFrame {
 
     private JButton btnBorrowBook;
+    private JButton viewBooksButton;
     private JButton btnReturnBook;
     private JButton btnViewHistory;
     private final JButton btnSearchBook;
@@ -46,11 +47,13 @@ public class UserDashboardView extends JFrame {
         btnBorrowBook = new JButton("Borrow Book");
         btnReturnBook = new JButton("Return Book");
         btnViewHistory = new JButton("View Borrowing History");
+        viewBooksButton = new JButton("View Available Books");
         btnLogout = new JButton("Logout");
 
         buttonPanel.add(createButtonPanel(btnBorrowBook, "Borrow a book from the library"));
         buttonPanel.add(createButtonPanel(btnReturnBook, "Return a borrowed book"));
         buttonPanel.add(createButtonPanel(btnViewHistory, "View your borrowing history"));
+        buttonPanel.add(createButtonPanel(viewBooksButton, "View Available Books"));
         buttonPanel.add(createButtonPanel(btnLogout, "Logout and return to Login Page"));
         mainPanel.add(buttonPanel, BorderLayout.CENTER);
 
@@ -74,6 +77,7 @@ public class UserDashboardView extends JFrame {
 
         btnReturnBook.addActionListener(e -> returnBook());
 
+        viewBooksButton.addActionListener(e -> showAvailableBooks());
 
         btnViewHistory.addActionListener(e -> viewHistory());
 
@@ -105,9 +109,15 @@ public class UserDashboardView extends JFrame {
         return btnViewHistory;
     }
 
+    public JButton getViewBooksButton(){return viewBooksButton;}
+
     private void logout() {
         dispose();
         SwingUtilities.invokeLater(() -> new LoginView().setVisible(true));
+    }
+
+    public static void showAvailableBooks() {
+        DatabaseLogic.showAvailableBooks();
     }
 
     private void searchBook() {

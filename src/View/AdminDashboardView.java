@@ -124,8 +124,16 @@ public class AdminDashboardView extends JFrame {
         String title = JOptionPane.showInputDialog(this, "Enter Book Title:");
         String author = JOptionPane.showInputDialog(this, "Enter Author Name:");
         int bookId = Integer.parseInt(JOptionPane.showInputDialog(this, "Enter Book ID:"));
-        boolean isAvailable = JOptionPane.showConfirmDialog(this, "Is the book available?", "Availability", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION;
 
+        int isAvailable = JOptionPane.showConfirmDialog(this, "Is the book available?\n1 means Available", "Availability", JOptionPane.YES_NO_OPTION);
+
+        if (isAvailable == JOptionPane.YES_OPTION) {
+            isAvailable = 1;
+        } else {
+            isAvailable = 0;
+        }
+
+        JOptionPane.showMessageDialog(this, "You selected: " + (isAvailable == 1 ? "Available" : "Unavailable") + "\n1 means Available and 0 means Unavailable");
 
 
         DatabaseLogic.addBook(title, author, bookId, isAvailable);

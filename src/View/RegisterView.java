@@ -14,6 +14,8 @@ public class RegisterView extends JFrame {
     private JPasswordField txtConfirmPassword;
     private JComboBox<String> roleComboBox;
     private JButton btnGeneratePassword;
+    private JCheckBox chkShowPassword;
+
     private JButton btnSubmit;
     private JButton btnCancel;
 
@@ -91,8 +93,15 @@ public class RegisterView extends JFrame {
         gbc.weightx = 0;
         panel.add(txtConfirmPassword, gbc);
 
-        gbc.gridx = 0;
+        chkShowPassword = new JCheckBox("Show Password");
+        gbc.gridx = 1;
         gbc.gridy = 5;
+        gbc.gridwidth = 1;
+        gbc.anchor = GridBagConstraints.WEST;
+        panel.add(chkShowPassword, gbc);
+
+        gbc.gridx = 0;
+        gbc.gridy = 6;
         panel.add(new JLabel("Role:"), gbc);
 
         String[] roles = {"User", "Admin"};
@@ -107,7 +116,7 @@ public class RegisterView extends JFrame {
         btnGeneratePassword = new JButton("Generate Password");
         btnGeneratePassword.setPreferredSize(new Dimension(200, 40));
         gbc.gridx = 0;
-        gbc.gridy = 6;
+        gbc.gridy = 7;
         gbc.gridwidth = 2;
         gbc.fill = GridBagConstraints.NONE;
         gbc.anchor = GridBagConstraints.CENTER;
@@ -117,7 +126,7 @@ public class RegisterView extends JFrame {
         btnSubmit = new JButton("Submit");
         btnSubmit.setPreferredSize(new Dimension(150, 40));
         gbc.gridx = 0;
-        gbc.gridy = 7;
+        gbc.gridy = 8;
         gbc.gridwidth = 1;
         gbc.fill = GridBagConstraints.NONE;
         gbc.anchor = GridBagConstraints.CENTER;
@@ -138,7 +147,20 @@ public class RegisterView extends JFrame {
         btnGeneratePassword.addActionListener(e -> generatePassword());
         btnSubmit.addActionListener(e -> handleSubmit());
         btnCancel.addActionListener(e -> handleCancel());
+
+        chkShowPassword.addActionListener(e -> {
+            if (chkShowPassword.isSelected()) {
+                txtPassword.setEchoChar((char) 0); // Show password
+                txtConfirmPassword.setEchoChar((char) 0);
+            } else {
+                txtPassword.setEchoChar('*'); // Hide password
+                txtConfirmPassword.setEchoChar('*');
+            }
+        });
     }
+
+
+
 
     private void generatePassword() {
         String generatedPassword = generateRandomPassword(12);
@@ -169,7 +191,7 @@ public class RegisterView extends JFrame {
         String email = txtEmail.getText().trim();
         String password = new String(txtPassword.getPassword());
         String confirmPassword = new String(txtConfirmPassword.getPassword());
-        String username = txtUsername.getText().trim();  // Ensure this is from a username input field
+        String username = txtUsername.getText().trim();
         String role = (String) roleComboBox.getSelectedItem();
 
         if (name.isEmpty() || email.isEmpty() || password.isEmpty() || confirmPassword.isEmpty() || username.isEmpty()) {

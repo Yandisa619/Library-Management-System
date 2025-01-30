@@ -30,9 +30,9 @@ public class DatabaseLogic {
             int result = stmt.executeUpdate();
 
             if (result > 0) {
-                System.out.println("Book added successfully.");
+                JOptionPane.showMessageDialog(null, "Book added successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
             } else {
-                System.out.println("Failed to add book.");
+                JOptionPane.showMessageDialog(null, "Failed to add book.", "Error", JOptionPane.ERROR_MESSAGE);
             }
         } catch (SQLException e) {
             e.printStackTrace();

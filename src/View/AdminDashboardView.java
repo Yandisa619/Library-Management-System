@@ -16,6 +16,7 @@ public class AdminDashboardView extends JFrame {
     private JButton btnAddBook;
     private JButton btnRemoveBook;
     private JButton btnViewHistory;
+    private JButton viewBooksButton;
     private JButton btnSearchBook;
     private JButton btnLogout;
     private JTextField txtSearchBook;
@@ -44,6 +45,7 @@ public class AdminDashboardView extends JFrame {
         btnAddBook = createButton("Add Book", "Add a new book to the library");
         btnRemoveBook = createButton("Remove Book", "Remove an existing book");
         btnViewHistory = createButton("View Borrowing History", "View history of borrowed books");
+        viewBooksButton = createButton("View Books", "View available books in the library");
         btnSearchBook = createButton("Search Book", "Search for a book by title or author");
         btnLogout = createButton("Logout", "Logout and return to login page");
 
@@ -52,6 +54,7 @@ public class AdminDashboardView extends JFrame {
         buttonPanel.add(createButtonPanel(btnRemoveBook));
         buttonPanel.add(createButtonPanel(btnSearchBook));
         buttonPanel.add(createButtonPanel(btnViewHistory));
+        buttonPanel.add(createButtonPanel(viewBooksButton));
         buttonPanel.add(createButtonPanel(btnLogout));
 
         JPanel containerPanel = new JPanel(new BorderLayout());
@@ -67,8 +70,7 @@ public class AdminDashboardView extends JFrame {
 
         btnLogout.addActionListener(e -> logout());
 
-
-
+        viewBooksButton.addActionListener(e -> showAvailableBooks());
 
         btnAddBook.addActionListener(new ActionListener() {
             @Override
@@ -119,6 +121,9 @@ public class AdminDashboardView extends JFrame {
         return panel;
     }
 
+    public static void showAvailableBooks() {
+        DatabaseLogic.showAvailableBooks();
+    }
 
     private void addBook() {
         String title = JOptionPane.showInputDialog(this, "Enter Book Title:");

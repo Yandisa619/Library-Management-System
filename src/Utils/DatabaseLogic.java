@@ -49,9 +49,9 @@ public class DatabaseLogic {
             int result = stmt.executeUpdate();
 
             if (result > 0) {
-                System.out.println("Book removed successfully.");
+                JOptionPane.showMessageDialog(null, "Book removed successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
             } else {
-                System.out.println("Failed to remove book.");
+                JOptionPane.showMessageDialog(null, "Failed to remove book.", "Error", JOptionPane.ERROR_MESSAGE);
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -134,14 +134,14 @@ public class DatabaseLogic {
             int result = stmt.executeUpdate();
 
             if (result > 0) {
-                System.out.println("Book borrowed successfully.");
+                JOptionPane.showMessageDialog(null, "Book borrowed successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
 
                 updateBookAvailability(bookId, false);
             } else {
-                System.out.println("Failed to borrow book.");
+                JOptionPane.showMessageDialog(null, "Failed to borrow book.", "Error", JOptionPane.ERROR_MESSAGE);
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            JOptionPane.showMessageDialog(null, "An error occurred: " + e.getMessage(), "Database Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -210,18 +210,18 @@ public class DatabaseLogic {
                         int result = returnStmt.executeUpdate();
 
                         if (result > 0) {
-                            System.out.println("Book returned successfully.");
+                            JOptionPane.showMessageDialog(null, "Book returned successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
                             updateStmt.setBoolean(1, true);
                             updateStmt.setInt(2, bookId);
                             updateStmt.executeUpdate();
                             conn.commit();
                         } else {
-                            System.out.println("Failed to return book.");
+                            JOptionPane.showMessageDialog(null, "Failed to return book.", "Error", JOptionPane.ERROR_MESSAGE);
                             conn.rollback();
                         }
                     }
                 } else {
-                    System.out.println("Error: Book was either not borrowed or already returned.");
+                   JOptionPane.showMessageDialog(null, "Book was either not borrowed or already returned.", "Error", JOptionPane.ERROR_MESSAGE);
                 }
             }
         } catch (SQLException e) {
